@@ -47,7 +47,7 @@ export function ListingForm({ initial }: { initial?: ListingInput }) {
     setError(null);
     try {
       const id = await saveListing(form, session.user.id);
-      router.push(`/listings/${id}`);
+      router.push(`/listings/edit?id=${id}`);
       router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Kaydedilemedi");

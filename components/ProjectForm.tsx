@@ -65,7 +65,7 @@ export function ProjectForm({ initial }: { initial?: VillaProjectInput }) {
     setError(null);
     try {
       const id = await saveVillaProject(form, session.user.id);
-      router.push(`/projects/${id}`);
+      router.push(`/projects/edit?id=${id}`);
       router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Kaydedilemedi");

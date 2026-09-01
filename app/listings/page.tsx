@@ -29,7 +29,7 @@ function ListingsList() {
       ) : (
         <div className="mt-6 divide-y divide-neutral-200 rounded-lg border border-neutral-200 bg-white">
           {listings.map((l) => (
-            <Link key={l.id} href={`/listings/${l.id}`} className="flex items-center justify-between px-4 py-3 hover:bg-neutral-50">
+            <Link key={l.id} href={`/listings/edit?id=${l.id}`} className="flex items-center justify-between px-4 py-3 hover:bg-neutral-50">
               <div>
                 <p className="font-medium">{l.title}</p>
                 <p className="text-xs text-neutral-500">
