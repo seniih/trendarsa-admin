@@ -34,7 +34,7 @@ function ProjectsList() {
             return (
               <Link
                 key={p.id}
-                href={`/projects/${p.id}`}
+                href={`/projects/edit?id=${p.id}`}
                 className="rounded-lg border border-neutral-200 bg-white p-4 hover:border-neutral-400"
               >
                 <div className="flex h-32 items-center justify-center overflow-hidden rounded-md bg-neutral-100">
