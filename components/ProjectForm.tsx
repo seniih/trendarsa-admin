@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import { useSession } from "@/lib/auth";
 import { saveVillaProject, deleteVillaProject, type VillaProjectInput } from "@/lib/projects";
+import { slugify } from "@/lib/utils";
 import { FloorEditor } from "./FloorEditor";
 import { ImageUploader } from "./ImageUploader";
 
@@ -61,6 +62,10 @@ export function ProjectForm({ initial }: { initial?: VillaProjectInput }) {
 
   async function onSubmit() {
     if (!session) return;
+    if (!form.slug.trim()) {
+      setError("Slug boş olamaz.");
+      return;
+    }
     setSaving(true);
     setError(null);
     try {
@@ -95,7 +100,17 @@ export function ProjectForm({ initial }: { initial?: VillaProjectInput }) {
       <section className="grid gap-4 sm:grid-cols-2">
         <label className={label}>
           Slug (URL, benzersiz)
-          <input className={field} value={form.slug} onChange={(e) => set("slug", e.target.value)} placeholder="dagyoncali" />
+          <div className="mt-1 flex gap-2">
+            <input className={field + " mt-0"} value={form.slug} onChange={(e) => set("slug", e.target.value)} placeholder="dagyoncali" />
+            <button
+              type="button"
+              onClick={() => set("slug", slugify(form.titleTr))}
+              disabled={!form.titleTr}
+              className="shrink-0 rounded-md border border-neutral-300 px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-50 disabled:opacity-50"
+            >
+              Başlıktan oluştur
+            </button>
+          </div>
         </label>
         <label className={label}>
           Durum

@@ -69,6 +69,13 @@ export interface ProjectListItem {
   coverImageKey: string | null;
 }
 
+function slugErrorMessage(error: { code?: string; message?: string } | null): string | null {
+  if (error?.code === "23505" && error.message?.includes("projects_slug_key")) {
+    return "Bu slug başka bir projede kullanılıyor. Lütfen farklı bir slug girin.";
+  }
+  return null;
+}
+
 async function getCategoryId(slug: "ev" | "arsa"): Promise<string> {
   const { data, error } = await supabase.from("categories").select("id").eq("slug", slug).single();
   if (error || !data) throw new Error(`'${slug}' kategorisi bulunamadı: ${error?.message}`);
@@ -162,10 +169,13 @@ export async function fetchVillaProject(id: string): Promise<VillaProjectInput> 
 export async function saveVillaProject(input: VillaProjectInput, adminId: string): Promise<string> {
   const categoryId = await getCategoryId("ev");
 
+  const slug = input.slug.trim();
+  if (!slug) throw new Error("Slug boş olamaz.");
+
   const row = {
     category_id: categoryId,
     created_by: adminId,
-    slug: input.slug,
+    slug,
     featured: input.featured,
     status: input.status,
     name: input.titleTr,
@@ -198,10 +208,10 @@ export async function saveVillaProject(input: VillaProjectInput, adminId: string
   let projectId = input.id;
   if (projectId) {
     const { error } = await supabase.from("projects").update(row).eq("id", projectId);
-    if (error) throw new Error(error.message);
+    if (error) throw new Error(slugErrorMessage(error) ?? error.message);
   } else {
     const { data, error } = await supabase.from("projects").insert(row).select("id").single();
-    if (error || !data) throw new Error(error?.message ?? "Proje oluşturulamadı");
+    if (error || !data) throw new Error(slugErrorMessage(error) ?? error?.message ?? "Proje oluşturulamadı");
     projectId = data.id;
   }
 
