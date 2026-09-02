@@ -22,7 +22,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen">
       <Nav />
-      <main className="mx-auto max-w-5xl px-6 py-8">{children}</main>
+      <main className="mx-auto max-w-6xl px-6 py-8">{children}</main>
     </div>
   );
 }
