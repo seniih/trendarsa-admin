@@ -5,10 +5,12 @@ import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import { useSession } from "@/lib/auth";
 import { saveListing, deleteListing, type ListingInput } from "@/lib/listings";
+import { slugify } from "@/lib/utils";
 import { ImageUploader } from "./ImageUploader";
 import { Field, fieldClass as field } from "./Field";
 import { FormSection } from "./FormSection";
 import { ListingPreview } from "./ListingPreview";
+import { PublishTargetPicker } from "./PublishTargetPicker";
 
 function emptyListing(): ListingInput {
   return {
@@ -27,7 +29,27 @@ function emptyListing(): ListingInput {
     whatsapp: "",
     status: "active",
     images: [],
+    publishTargets: ["trendarsa-app", "trendarsa-web"],
+    slug: "",
+    featured: false,
+    titleEn: "",
+    excerptTr: "",
+    excerptEn: "",
+    descriptionEn: [],
+    tagsTr: [],
+    tagsEn: [],
+    emsal: null,
+    installment: true,
+    saleStatus: "available",
   };
+}
+
+function linesToArray(value: string): string[] {
+  return value.split("\n").map((l) => l.trim()).filter(Boolean);
+}
+
+function commaToArray(value: string): string[] {
+  return value.split(",").map((l) => l.trim()).filter(Boolean);
 }
 
 export function ListingForm({ initial }: { initial?: ListingInput }) {
@@ -77,6 +99,20 @@ export function ListingForm({ initial }: { initial?: ListingInput }) {
 
         <FormSection
           step={1}
+          title="Nerede Yayınlansın?"
+          description="Arsa ilanları TrendEv sitesinde gösterilmez; oraya villa projeleri girilir."
+        >
+          <div className="sm:col-span-2">
+            <PublishTargetPicker
+              value={form.publishTargets}
+              available={["trendarsa-web", "trendarsa-app"]}
+              onChange={(targets) => set("publishTargets", targets)}
+            />
+          </div>
+        </FormSection>
+
+        <FormSection
+          step={2}
           title="Temel Bilgiler"
           description="İlan kartında başlık olarak, detay sayfasında da başlık + açıklama olarak gösterilir."
         >
@@ -94,7 +130,7 @@ export function ListingForm({ initial }: { initial?: ListingInput }) {
           </Field>
         </FormSection>
 
-        <FormSection step={2} title="Fiyat ve Metrekare" description="Kartta ve detay sayfasında büyük fiyat olarak gösterilir." columns={3}>
+        <FormSection step={3} title="Fiyat ve Metrekare" description="Kartta ve detay sayfasında büyük fiyat olarak gösterilir." columns={3}>
           <Field label="Fiyat">
             <input type="number" className={field} value={form.price} onChange={(e) => set("price", Number(e.target.value))} />
           </Field>
@@ -115,7 +151,7 @@ export function ListingForm({ initial }: { initial?: ListingInput }) {
         </FormSection>
 
         <FormSection
-          step={3}
+          step={4}
           title="Konum"
           description="İl/ilçe kartta ve detayda, mahalle sadece detayda gösterilir. Enlem/boylam detay sayfasındaki haritada pin konumunu belirler."
           columns={3}
@@ -138,7 +174,7 @@ export function ListingForm({ initial }: { initial?: ListingInput }) {
         </FormSection>
 
         <FormSection
-          step={4}
+          step={5}
           title="İletişim"
           description="Detay sayfasında Ara / WhatsApp butonlarını oluşturur. İkisi de boşsa hiç buton gösterilmez."
         >
@@ -150,7 +186,104 @@ export function ListingForm({ initial }: { initial?: ListingInput }) {
           </Field>
         </FormSection>
 
-        <FormSection step={5} title="Fotoğraflar" description="İlk fotoğraf kartta kapak olarak, tümü detay sayfasında galeri olarak gösterilir.">
+        {form.publishTargets.includes("trendarsa-web") && (
+          <FormSection
+            step={6}
+            title="TrendArsa Sitesi Alanları"
+            description="Yalnızca site için kullanılır; mobil uygulama bu alanları göstermez."
+          >
+            <Field label="Slug (URL, benzersiz)" hint="Sitede trendarsa.com/ilanlar/<slug> adresini oluşturur.">
+              <div className="mt-1 flex gap-2">
+                <input
+                  className={field + " mt-0"}
+                  value={form.slug}
+                  onChange={(e) => set("slug", e.target.value)}
+                  placeholder="kaynarca-turnali-gol-manzarali"
+                />
+                <button
+                  type="button"
+                  onClick={() => set("slug", slugify(form.title))}
+                  disabled={!form.title}
+                  className="shrink-0 rounded-md border border-neutral-300 px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-50 disabled:opacity-50"
+                >
+                  Başlıktan oluştur
+                </button>
+              </div>
+            </Field>
+            <Field label="Sitedeki satış durumu">
+              <select
+                className={field}
+                value={form.saleStatus}
+                onChange={(e) => set("saleStatus", e.target.value as ListingInput["saleStatus"])}
+              >
+                <option value="available">Satılık</option>
+                <option value="reserved">Rezerve</option>
+                <option value="sold">Satıldı</option>
+              </select>
+            </Field>
+            <label className="flex items-center gap-2 text-sm font-medium text-neutral-700">
+              <input
+                type="checkbox"
+                checked={form.featured}
+                onChange={(e) => set("featured", e.target.checked)}
+              />
+              Öne çıkan (ana sayfada göster)
+            </label>
+            <label className="flex items-center gap-2 text-sm font-medium text-neutral-700">
+              <input
+                type="checkbox"
+                checked={form.installment}
+                onChange={(e) => set("installment", e.target.checked)}
+              />
+              Taksitli ödeme var
+            </label>
+            <Field label="Başlık (EN)" optional hint="Boşsa İngilizce sayfada başlık boş görünür.">
+              <input className={field} value={form.titleEn} onChange={(e) => set("titleEn", e.target.value)} />
+            </Field>
+            <Field label="Emsal" optional>
+              <input
+                type="number"
+                step="0.05"
+                className={field}
+                value={form.emsal ?? ""}
+                onChange={(e) => set("emsal", e.target.value ? Number(e.target.value) : null)}
+                placeholder="0.40"
+              />
+            </Field>
+            <Field label="Kısa özet (TR)" optional>
+              <textarea className={field} rows={2} value={form.excerptTr} onChange={(e) => set("excerptTr", e.target.value)} />
+            </Field>
+            <Field label="Kısa özet (EN)" optional>
+              <textarea className={field} rows={2} value={form.excerptEn} onChange={(e) => set("excerptEn", e.target.value)} />
+            </Field>
+            <Field label="Açıklama — her satır ayrı paragraf (EN)" optional hint="Türkçesi yukarıdaki &quot;Açıklama&quot; alanından alınır." className="sm:col-span-2">
+              <textarea
+                className={field}
+                rows={4}
+                value={form.descriptionEn.join("\n")}
+                onChange={(e) => set("descriptionEn", linesToArray(e.target.value))}
+              />
+            </Field>
+            <Field label="Etiketler (TR) — virgülle ayırın" optional>
+              <input
+                className={field}
+                value={form.tagsTr.join(", ")}
+                onChange={(e) => set("tagsTr", commaToArray(e.target.value))}
+                placeholder="Göl manzaralı, İmarlı, Tapu güvenceli"
+              />
+            </Field>
+            <Field label="Etiketler (EN) — virgülle ayırın" optional>
+              <input
+                className={field}
+                value={form.tagsEn.join(", ")}
+                onChange={(e) => set("tagsEn", commaToArray(e.target.value))}
+                placeholder="Lake view, Zoned, Title-deed secured"
+              />
+            </Field>
+          </FormSection>
+        )}
+
+        <FormSection step={form.publishTargets.includes("trendarsa-web") ? 7 : 6} title="Fotoğraflar" description="İlk fotoğraf kartta kapak olarak, tümü detay sayfasında galeri olarak gösterilir.">
           <div className="sm:col-span-2">
             <ImageUploader
               folder="listings"

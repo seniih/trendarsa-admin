@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Upload, X, Loader2 } from "lucide-react";
-import { uploadImageToR2 } from "@/lib/upload";
+import { uploadImageToR2, type UploadFolder } from "@/lib/upload";
 import { r2Url } from "@/lib/supabase";
 
 /** Kapak (tekli) veya galeri (çoklu) görsel yükleyici — R2'ye direkt yükler. */
@@ -12,29 +12,35 @@ export function ImageUploader({
   onChange,
   multiple = false,
 }: {
-  folder: "projects" | "listings";
+  folder: UploadFolder;
   images: string[];
   onChange: (images: string[]) => void;
   multiple?: boolean;
 }) {
-  const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const uploading = progress !== null;
 
-  async function handleFiles(files: FileList | null) {
-    if (!files || files.length === 0) return;
-    setUploading(true);
+  async function handleFiles(selected: File[]) {
+    if (selected.length === 0) return;
+    setProgress({ done: 0, total: selected.length });
     setError(null);
+
+    const uploaded: string[] = [];
     try {
-      const uploaded: string[] = [];
-      for (const file of Array.from(files)) {
+      for (const file of selected) {
         const { objectKey } = await uploadImageToR2(file, folder);
         uploaded.push(objectKey);
+        setProgress({ done: uploaded.length, total: selected.length });
       }
-      onChange(multiple ? [...images, ...uploaded] : uploaded.slice(0, 1));
     } catch (e) {
       setError(e instanceof Error ? e.message : "Yükleme başarısız");
     } finally {
-      setUploading(false);
+      // Hata olsa da o ana kadar yüklenenler korunur.
+      if (uploaded.length > 0) {
+        onChange(multiple ? [...images, ...uploaded] : uploaded.slice(0, 1));
+      }
+      setProgress(null);
     }
   }
 
@@ -63,14 +69,22 @@ export function ImageUploader({
         })}
         <label className="flex h-24 w-24 cursor-pointer flex-col items-center justify-center gap-1 rounded-md border border-dashed border-neutral-300 text-neutral-400 hover:border-neutral-400 hover:text-neutral-600">
           {uploading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Upload className="h-5 w-5" />}
-          <span className="text-[11px]">{uploading ? "Yükleniyor" : "Ekle"}</span>
+          <span className="text-[11px]">
+            {progress ? `${progress.done}/${progress.total}` : "Ekle"}
+          </span>
           <input
             type="file"
             accept="image/*"
             multiple={multiple}
             className="hidden"
             disabled={uploading}
-            onChange={(e) => handleFiles(e.target.files)}
+            onChange={(e) => {
+              // FileList input'a bağlı olduğu için önce kopyalanır, sonra input
+              // sıfırlanır — aynı dosya tekrar seçildiğinde de onChange tetiklensin diye.
+              const selected = Array.from(e.target.files ?? []);
+              e.target.value = "";
+              void handleFiles(selected);
+            }}
           />
         </label>
       </div>

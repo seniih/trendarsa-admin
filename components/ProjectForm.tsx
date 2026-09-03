@@ -11,6 +11,7 @@ import { ImageUploader } from "./ImageUploader";
 import { Field, fieldClass as field } from "./Field";
 import { FormSection } from "./FormSection";
 import { ProjectPreview } from "./ProjectPreview";
+import { PublishTargetPicker } from "./PublishTargetPicker";
 
 function emptyProject(): VillaProjectInput {
   return {
@@ -42,6 +43,7 @@ function emptyProject(): VillaProjectInput {
     coverImageKey: null,
     floors: [],
     gallery: [],
+    publishTargets: ["trendev-web"],
   };
 }
 
@@ -98,7 +100,20 @@ export function ProjectForm({ initial }: { initial?: VillaProjectInput }) {
           )}
         </div>
 
-        <FormSection step={1} title="Temel Bilgiler" description="Sayfanın adresini ve kartta görünen durumu belirler.">
+        <FormSection
+          step={1}
+          title="Nerede Yayınlansın?"
+          description="Aynı proje birden fazla yüzeyde yayınlanabilir."
+        >
+          <div className="sm:col-span-2">
+            <PublishTargetPicker
+              value={form.publishTargets}
+              onChange={(targets) => set("publishTargets", targets)}
+            />
+          </div>
+        </FormSection>
+
+        <FormSection step={2} title="Temel Bilgiler" description="Sayfanın adresini ve kartta görünen durumu belirler.">
           <Field label="Slug (URL)" hint="Sitede trendev.com/projeler/<slug> adresini oluşturur, benzersiz olmalı.">
             <div className="mt-1 flex gap-2">
               <input className={field + " mt-0"} value={form.slug} onChange={(e) => set("slug", e.target.value)} placeholder="dagyoncali" />
@@ -126,7 +141,7 @@ export function ProjectForm({ initial }: { initial?: VillaProjectInput }) {
         </FormSection>
 
         <FormSection
-          step={2}
+          step={3}
           title="Başlık ve Özet (TR / EN)"
           description="Başlık kartta ve detay sayfasında, özet kartta 2 satır ve detay sayfasının üst kısmında gösterilir."
         >
@@ -145,7 +160,7 @@ export function ProjectForm({ initial }: { initial?: VillaProjectInput }) {
         </FormSection>
 
         <FormSection
-          step={3}
+          step={4}
           title="Açıklama ve Öne Çıkanlar (TR / EN)"
           description="Sadece proje detay sayfasında gösterilir — kartta görünmez. İkisi de boş bırakılabilir."
         >
@@ -184,7 +199,7 @@ export function ProjectForm({ initial }: { initial?: VillaProjectInput }) {
         </FormSection>
 
         <FormSection
-          step={4}
+          step={5}
           title="Konum ve Parsel Bilgileri"
           description="Konum kartta ve detayda gösterilir; ada-parsel sadece detay sayfasındaki özet kutusunda görünür."
           columns={3}
@@ -219,7 +234,7 @@ export function ProjectForm({ initial }: { initial?: VillaProjectInput }) {
         </FormSection>
 
         <FormSection
-          step={5}
+          step={6}
           title="Fiyat ve Alan Bilgileri"
           description="Fiyat min değeri kartta, aralığın tamamı detay sayfasında; toplam villa alanı kartın üstündeki rozette gösterilir."
           columns={3}
@@ -250,13 +265,13 @@ export function ProjectForm({ initial }: { initial?: VillaProjectInput }) {
           </Field>
         </FormSection>
 
-        <FormSection step={6} title="Kat Planı" description="Detay sayfasında her kat ayrı bir kart olarak, oda dökümüyle birlikte gösterilir." columns={2}>
+        <FormSection step={7} title="Kat Planı" description="Detay sayfasında her kat ayrı bir kart olarak, oda dökümüyle birlikte gösterilir." columns={2}>
           <div className="sm:col-span-2">
             <FloorEditor floors={form.floors} onChange={(floors) => set("floors", floors)} />
           </div>
         </FormSection>
 
-        <FormSection step={7} title="Kapak Fotoğrafı" description="Kartta ve detay sayfasının üstündeki büyük görselde kullanılır.">
+        <FormSection step={8} title="Kapak Fotoğrafı" description="Kartta ve detay sayfasının üstündeki büyük görselde kullanılır.">
           <div className="sm:col-span-2">
             <ImageUploader
               folder="projects"
@@ -266,7 +281,7 @@ export function ProjectForm({ initial }: { initial?: VillaProjectInput }) {
           </div>
         </FormSection>
 
-        <FormSection step={8} title="Galeri" description="Sadece detay sayfasında gösterilir. Boş bırakılırsa galeri bölümü hiç görünmez.">
+        <FormSection step={9} title="Galeri" description="Sadece detay sayfasında gösterilir. Boş bırakılırsa galeri bölümü hiç görünmez.">
           <div className="sm:col-span-2">
             <ImageUploader
               folder="projects"

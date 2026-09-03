@@ -6,6 +6,7 @@ import { Plus } from "lucide-react";
 import { AuthGuard } from "@/components/AuthGuard";
 import { fetchVillaProjects, type ProjectListItem } from "@/lib/projects";
 import { r2Url } from "@/lib/supabase";
+import { TargetBadges } from "@/components/TargetBadges";
 
 function ProjectsList() {
   const [projects, setProjects] = useState<ProjectListItem[] | null>(null);
@@ -49,6 +50,9 @@ function ProjectsList() {
                 <p className="mt-1 text-xs text-neutral-500">
                   {p.status} {p.featured && "· öne çıkan"}
                 </p>
+                <div className="mt-2">
+                  <TargetBadges targets={p.publishTargets} />
+                </div>
               </Link>
             );
           })}
