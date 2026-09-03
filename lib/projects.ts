@@ -1,4 +1,5 @@
 import { supabase } from "./supabase";
+import { parseTargets, type PublishTarget } from "./targets";
 
 export type RoomKey =
   | "room"
@@ -58,6 +59,8 @@ export interface VillaProjectInput {
   coverImageKey: string | null;
   floors: Floor[];
   gallery: GalleryImage[];
+  /** Bu projenin görüneceği yüzeyler (bkz. lib/targets.ts). */
+  publishTargets: PublishTarget[];
 }
 
 export interface ProjectListItem {
@@ -67,6 +70,7 @@ export interface ProjectListItem {
   status: string;
   featured: boolean;
   coverImageKey: string | null;
+  publishTargets: PublishTarget[];
 }
 
 function slugErrorMessage(error: { code?: string; message?: string } | null): string | null {
@@ -86,7 +90,7 @@ export async function fetchVillaProjects(): Promise<ProjectListItem[]> {
   const categoryId = await getCategoryId("ev");
   const { data, error } = await supabase
     .from("projects")
-    .select("id, slug, title_tr, status, featured, cover_image_key")
+    .select("id, slug, title_tr, status, featured, cover_image_key, publish_targets")
     .eq("category_id", categoryId)
     .order("created_at", { ascending: false });
   if (error) throw new Error(error.message);
@@ -97,6 +101,7 @@ export async function fetchVillaProjects(): Promise<ProjectListItem[]> {
     status: r.status ?? "available",
     featured: r.featured,
     coverImageKey: r.cover_image_key,
+    publishTargets: parseTargets(r.publish_targets),
   }));
 }
 
@@ -109,6 +114,7 @@ export async function fetchVillaProject(id: string): Promise<VillaProjectInput> 
        district, neighborhood, city, ada_parsel, project_area_m2, parcel_count,
        parcel_kind, parcel_area_min, parcel_area_max, price_range_min, price_range_max,
        total_area_m2, travel_to_sakarya_min, travel_to_istanbul_hour, cover_image_key,
+       publish_targets,
        project_floors ( id, key, area_m2, outdoor_kind, outdoor_area_m2, position,
          project_floor_rooms ( room_key, count, position ) ),
        project_images ( id, storage_key, position )`,
@@ -163,6 +169,7 @@ export async function fetchVillaProject(id: string): Promise<VillaProjectInput> 
     coverImageKey: data.cover_image_key,
     floors,
     gallery,
+    publishTargets: parseTargets(data.publish_targets),
   };
 }
 
@@ -203,6 +210,7 @@ export async function saveVillaProject(input: VillaProjectInput, adminId: string
     travel_to_sakarya_min: input.travelToSakaryaMin,
     travel_to_istanbul_hour: input.travelToIstanbulHour,
     cover_image_key: input.coverImageKey,
+    publish_targets: input.publishTargets,
   };
 
   let projectId = input.id;

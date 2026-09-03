@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Plus } from "lucide-react";
 import { AuthGuard } from "@/components/AuthGuard";
 import { fetchListings, type ListingListItem } from "@/lib/listings";
+import { TargetBadges } from "@/components/TargetBadges";
 
 function ListingsList() {
   const [listings, setListings] = useState<ListingListItem[] | null>(null);
@@ -35,6 +36,9 @@ function ListingsList() {
                 <p className="text-xs text-neutral-500">
                   {l.ilce} / {l.il} · {l.status}
                 </p>
+                <div className="mt-1.5">
+                  <TargetBadges targets={l.publishTargets} />
+                </div>
               </div>
               <p className="text-sm font-medium text-neutral-700">
                 {new Intl.NumberFormat("tr-TR", { style: "currency", currency: l.currency, maximumFractionDigits: 0 }).format(l.price)}

@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LogOut, Home, MapPinned } from "lucide-react";
+import { LogOut, Home, MapPinned, LayoutTemplate } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 
 const links = [
   { href: "/projects", label: "Villa Projeleri (ev)", icon: Home },
   { href: "/listings", label: "Arsa İlanları", icon: MapPinned },
+  { href: "/site", label: "Site İçeriği", icon: LayoutTemplate },
 ];
 
 export function Nav() {
