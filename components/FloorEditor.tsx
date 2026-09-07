@@ -57,8 +57,8 @@ export function FloorEditor({ floors, onChange }: { floors: Floor[]; onChange: (
             </select>
             <input
               type="number"
-              value={floor.areaM2}
-              onChange={(e) => updateFloor(floorIndex, { areaM2: Number(e.target.value) })}
+              value={floor.areaM2 || ""}
+              onChange={(e) => updateFloor(floorIndex, { areaM2: e.target.value ? Number(e.target.value) : 0 })}
               placeholder="Alan m²"
               className="w-28 rounded-md border border-neutral-300 px-2 py-1.5 text-sm"
             />
