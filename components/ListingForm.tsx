@@ -126,7 +126,12 @@ export function ListingForm({ initial }: { initial?: ListingInput }) {
             <input className={field} value={form.title} onChange={(e) => set("title", e.target.value)} />
           </Field>
           {form.publishTargets.includes("trendarsa-web") && (
-            <Field label="Slug (URL, benzersiz)" hint="Sitede trendarsa.com/ilanlar/<slug> adresini oluşturur.">
+            <Field label="Başlık (EN)" optional hint="Boşsa İngilizce sayfada başlık boş görünür.">
+              <input className={field} value={form.titleEn} onChange={(e) => set("titleEn", e.target.value)} />
+            </Field>
+          )}
+          {form.publishTargets.includes("trendarsa-web") && (
+            <Field label="Slug (URL, benzersiz)" hint="Sitede trendarsa.com/ilanlar/<slug> adresini oluşturur." className="sm:col-span-2">
               <div className="mt-1 flex gap-2">
                 <input
                   className={field + " mt-0"}
@@ -143,6 +148,16 @@ export function ListingForm({ initial }: { initial?: ListingInput }) {
                   Başlıktan oluştur
                 </button>
               </div>
+            </Field>
+          )}
+          {form.publishTargets.includes("trendarsa-web") && (
+            <Field label="Kısa özet (TR)" optional>
+              <textarea className={field} rows={2} value={form.excerptTr} onChange={(e) => set("excerptTr", e.target.value)} />
+            </Field>
+          )}
+          {form.publishTargets.includes("trendarsa-web") && (
+            <Field label="Kısa özet (EN)" optional>
+              <textarea className={field} rows={2} value={form.excerptEn} onChange={(e) => set("excerptEn", e.target.value)} />
             </Field>
           )}
           <Field label="Açıklama" optional hint="Boş bırakılırsa detay sayfasında açıklama bölümü hiç gösterilmez." className="sm:col-span-2">
@@ -244,9 +259,6 @@ export function ListingForm({ initial }: { initial?: ListingInput }) {
               />
               Taksitli ödeme var
             </label>
-            <Field label="Başlık (EN)" optional hint="Boşsa İngilizce sayfada başlık boş görünür.">
-              <input className={field} value={form.titleEn} onChange={(e) => set("titleEn", e.target.value)} />
-            </Field>
             <Field label="Emsal" optional>
               <input
                 type="number"
@@ -256,12 +268,6 @@ export function ListingForm({ initial }: { initial?: ListingInput }) {
                 onChange={(e) => set("emsal", e.target.value ? Number(e.target.value) : null)}
                 placeholder="0.40"
               />
-            </Field>
-            <Field label="Kısa özet (TR)" optional>
-              <textarea className={field} rows={2} value={form.excerptTr} onChange={(e) => set("excerptTr", e.target.value)} />
-            </Field>
-            <Field label="Kısa özet (EN)" optional>
-              <textarea className={field} rows={2} value={form.excerptEn} onChange={(e) => set("excerptEn", e.target.value)} />
             </Field>
             <Field label="Açıklama — her satır ayrı paragraf (EN)" optional hint="Türkçesi yukarıdaki &quot;Açıklama&quot; alanından alınır." className="sm:col-span-2">
               <textarea
