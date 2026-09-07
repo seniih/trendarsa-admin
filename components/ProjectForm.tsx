@@ -9,6 +9,7 @@ import { slugify } from "@/lib/utils";
 import { FloorEditor } from "./FloorEditor";
 import { ImageUploader } from "./ImageUploader";
 import { Field, fieldClass as field } from "./Field";
+import { ListEditor } from "./ListEditor";
 import { FormSection } from "./FormSection";
 import { ProjectPreview } from "./ProjectPreview";
 import { PublishTargetPicker } from "./PublishTargetPicker";
@@ -71,7 +72,12 @@ export function ProjectForm({ initial }: { initial?: VillaProjectInput }) {
     setSaving(true);
     setError(null);
     try {
-      const id = await saveVillaProject(form, session.user.id);
+      const payload: VillaProjectInput = {
+        ...form,
+        highlightsTr: form.highlightsTr.map((h) => h.trim()).filter(Boolean),
+        highlightsEn: form.highlightsEn.map((h) => h.trim()).filter(Boolean),
+      };
+      const id = await saveVillaProject(payload, session.user.id);
       router.push(`/projects/edit?id=${id}`);
       router.refresh();
     } catch (e) {
@@ -120,11 +126,14 @@ export function ProjectForm({ initial }: { initial?: VillaProjectInput }) {
           </Field>
         </FormSection>
 
-        <FormSection step={2} title="Temel Bilgiler" description="Sayfanın adresini ve kartta görünen durumu belirler.">
+        <FormSection step={2} title="Temel Bilgiler" description="Sayfanın adresini, başlığını ve kartta görünen özetini belirler.">
           <Field label="Başlık (TR)">
             <input className={field} value={form.titleTr} onChange={(e) => set("titleTr", e.target.value)} />
           </Field>
-          <Field label="Slug (URL)" hint="Sitede trendev.com/projeler/<slug> adresini oluşturur, benzersiz olmalı.">
+          <Field label="Başlık (EN)" optional hint="Boşsa İngilizce sayfada başlık boş görünür.">
+            <input className={field} value={form.titleEn} onChange={(e) => set("titleEn", e.target.value)} />
+          </Field>
+          <Field label="Slug (URL)" hint="Sitede trendev.com/projeler/<slug> adresini oluşturur, benzersiz olmalı." className="sm:col-span-2">
             <div className="mt-1 flex gap-2">
               <input className={field + " mt-0"} value={form.slug} onChange={(e) => set("slug", e.target.value)} placeholder="dagyoncali" />
               <button
@@ -137,6 +146,12 @@ export function ProjectForm({ initial }: { initial?: VillaProjectInput }) {
               </button>
             </div>
           </Field>
+          <Field label="Kısa özet (TR)" optional>
+            <textarea className={field} rows={2} value={form.excerptTr} onChange={(e) => set("excerptTr", e.target.value)} />
+          </Field>
+          <Field label="Kısa özet (EN)" optional hint="Boşsa İngilizce sayfada özet boş görünür.">
+            <textarea className={field} rows={2} value={form.excerptEn} onChange={(e) => set("excerptEn", e.target.value)} />
+          </Field>
           <label className="flex items-center gap-2 text-sm font-medium text-neutral-700 sm:col-span-2">
             <input type="checkbox" checked={form.featured} onChange={(e) => set("featured", e.target.checked)} />
             Öne çıkan — ana sayfada &quot;öne çıkan projeler&quot; bölümünde de gösterilir
@@ -145,22 +160,6 @@ export function ProjectForm({ initial }: { initial?: VillaProjectInput }) {
 
         <FormSection
           step={3}
-          title="Başlık (EN) ve Özet (TR / EN)"
-          description="Özet kartta 2 satır ve detay sayfasının üst kısmında gösterilir."
-        >
-          <Field label="Başlık (EN)" optional hint="Boşsa İngilizce sayfada başlık boş görünür.">
-            <input className={field} value={form.titleEn} onChange={(e) => set("titleEn", e.target.value)} />
-          </Field>
-          <Field label="Kısa özet (TR)" optional>
-            <textarea className={field} rows={2} value={form.excerptTr} onChange={(e) => set("excerptTr", e.target.value)} />
-          </Field>
-          <Field label="Kısa özet (EN)" optional hint="Boşsa İngilizce sayfada özet boş görünür.">
-            <textarea className={field} rows={2} value={form.excerptEn} onChange={(e) => set("excerptEn", e.target.value)} />
-          </Field>
-        </FormSection>
-
-        <FormSection
-          step={4}
           title="Açıklama ve Öne Çıkanlar (TR / EN)"
           description="Sadece proje detay sayfasında gösterilir — kartta görünmez. İkisi de boş bırakılabilir."
         >
@@ -180,26 +179,16 @@ export function ProjectForm({ initial }: { initial?: VillaProjectInput }) {
               onChange={(e) => set("descriptionEn", linesToArray(e.target.value))}
             />
           </Field>
-          <Field label="Öne çıkanlar — her satır bir madde (TR)" optional hint="Boşsa detay sayfasında bu rozet listesi hiç gösterilmez.">
-            <textarea
-              className={field}
-              rows={3}
-              value={form.highlightsTr.join("\n")}
-              onChange={(e) => set("highlightsTr", linesToArray(e.target.value))}
-            />
+          <Field label="Öne çıkanlar (TR)" optional hint="Boşsa detay sayfasında bu rozet listesi hiç gösterilmez.">
+            <ListEditor items={form.highlightsTr} onChange={(items) => set("highlightsTr", items)} placeholder="Göl manzaralı" />
           </Field>
-          <Field label="Öne çıkanlar — her satır bir madde (EN)" optional>
-            <textarea
-              className={field}
-              rows={3}
-              value={form.highlightsEn.join("\n")}
-              onChange={(e) => set("highlightsEn", linesToArray(e.target.value))}
-            />
+          <Field label="Öne çıkanlar (EN)" optional>
+            <ListEditor items={form.highlightsEn} onChange={(items) => set("highlightsEn", items)} placeholder="Lake view" />
           </Field>
         </FormSection>
 
         <FormSection
-          step={5}
+          step={4}
           title="Konum ve Parsel Bilgileri"
           description="Konum kartta ve detayda gösterilir; ada-parsel sadece detay sayfasındaki özet kutusunda görünür."
           columns={3}
@@ -249,7 +238,7 @@ export function ProjectForm({ initial }: { initial?: VillaProjectInput }) {
         </FormSection>
 
         <FormSection
-          step={6}
+          step={5}
           title="Fiyat ve Alan Bilgileri"
           description="Fiyat min değeri kartta, aralığın tamamı detay sayfasında; toplam villa alanı kartın üstündeki rozette gösterilir."
           columns={3}
@@ -305,13 +294,13 @@ export function ProjectForm({ initial }: { initial?: VillaProjectInput }) {
           </Field>
         </FormSection>
 
-        <FormSection step={7} title="Kat Planı" description="Detay sayfasında her kat ayrı bir kart olarak, oda dökümüyle birlikte gösterilir." columns={2}>
+        <FormSection step={6} title="Kat Planı" description="Detay sayfasında her kat ayrı bir kart olarak, oda dökümüyle birlikte gösterilir." columns={2}>
           <div className="sm:col-span-2">
             <FloorEditor floors={form.floors} onChange={(floors) => set("floors", floors)} />
           </div>
         </FormSection>
 
-        <FormSection step={8} title="Kapak Fotoğrafı" description="Kartta ve detay sayfasının üstündeki büyük görselde kullanılır.">
+        <FormSection step={7} title="Kapak Fotoğrafı" description="Kartta ve detay sayfasının üstündeki büyük görselde kullanılır.">
           <div className="sm:col-span-2">
             <ImageUploader
               folder="projects"
@@ -321,7 +310,7 @@ export function ProjectForm({ initial }: { initial?: VillaProjectInput }) {
           </div>
         </FormSection>
 
-        <FormSection step={9} title="Galeri" description="Sadece detay sayfasında gösterilir. Boş bırakılırsa galeri bölümü hiç görünmez.">
+        <FormSection step={8} title="Galeri" description="Sadece detay sayfasında gösterilir. Boş bırakılırsa galeri bölümü hiç görünmez.">
           <div className="sm:col-span-2">
             <ImageUploader
               folder="projects"
