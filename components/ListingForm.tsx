@@ -109,6 +109,12 @@ export function ListingForm({ initial }: { initial?: ListingInput }) {
               onChange={(targets) => set("publishTargets", targets)}
             />
           </div>
+          <Field label="Durum" hint="Pasif seçilirse bu ilan uygulamada kimseye görünmez, sadece burada saklanır.">
+            <select className={field} value={form.status} onChange={(e) => set("status", e.target.value as ListingInput["status"])}>
+              <option value="active">Aktif — herkese görünür</option>
+              <option value="passive">Pasif — gizli</option>
+            </select>
+          </Field>
         </FormSection>
 
         <FormSection
@@ -119,12 +125,26 @@ export function ListingForm({ initial }: { initial?: ListingInput }) {
           <Field label="Başlık">
             <input className={field} value={form.title} onChange={(e) => set("title", e.target.value)} />
           </Field>
-          <Field label="Durum" hint="Pasif seçilirse bu ilan uygulamada kimseye görünmez, sadece burada saklanır.">
-            <select className={field} value={form.status} onChange={(e) => set("status", e.target.value as ListingInput["status"])}>
-              <option value="active">Aktif — herkese görünür</option>
-              <option value="passive">Pasif — gizli</option>
-            </select>
-          </Field>
+          {form.publishTargets.includes("trendarsa-web") && (
+            <Field label="Slug (URL, benzersiz)" hint="Sitede trendarsa.com/ilanlar/<slug> adresini oluşturur.">
+              <div className="mt-1 flex gap-2">
+                <input
+                  className={field + " mt-0"}
+                  value={form.slug}
+                  onChange={(e) => set("slug", e.target.value)}
+                  placeholder="kaynarca-turnali-gol-manzarali"
+                />
+                <button
+                  type="button"
+                  onClick={() => set("slug", slugify(form.title))}
+                  disabled={!form.title}
+                  className="shrink-0 rounded-md border border-neutral-300 px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-50 disabled:opacity-50"
+                >
+                  Başlıktan oluştur
+                </button>
+              </div>
+            </Field>
+          )}
           <Field label="Açıklama" optional hint="Boş bırakılırsa detay sayfasında açıklama bölümü hiç gösterilmez." className="sm:col-span-2">
             <textarea className={field} rows={4} value={form.description} onChange={(e) => set("description", e.target.value)} />
           </Field>
@@ -132,7 +152,12 @@ export function ListingForm({ initial }: { initial?: ListingInput }) {
 
         <FormSection step={3} title="Fiyat ve Metrekare" description="Kartta ve detay sayfasında büyük fiyat olarak gösterilir." columns={3}>
           <Field label="Fiyat">
-            <input type="number" className={field} value={form.price} onChange={(e) => set("price", Number(e.target.value))} />
+            <input
+              type="number"
+              className={field}
+              value={form.price || ""}
+              onChange={(e) => set("price", e.target.value ? Number(e.target.value) : 0)}
+            />
           </Field>
           <Field label="Para birimi" hint="Örn. TRY, USD">
             <input className={field} value={form.currency} onChange={(e) => set("currency", e.target.value)} />
@@ -192,24 +217,6 @@ export function ListingForm({ initial }: { initial?: ListingInput }) {
             title="TrendArsa Sitesi Alanları"
             description="Yalnızca site için kullanılır; mobil uygulama bu alanları göstermez."
           >
-            <Field label="Slug (URL, benzersiz)" hint="Sitede trendarsa.com/ilanlar/<slug> adresini oluşturur.">
-              <div className="mt-1 flex gap-2">
-                <input
-                  className={field + " mt-0"}
-                  value={form.slug}
-                  onChange={(e) => set("slug", e.target.value)}
-                  placeholder="kaynarca-turnali-gol-manzarali"
-                />
-                <button
-                  type="button"
-                  onClick={() => set("slug", slugify(form.title))}
-                  disabled={!form.title}
-                  className="shrink-0 rounded-md border border-neutral-300 px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-50 disabled:opacity-50"
-                >
-                  Başlıktan oluştur
-                </button>
-              </div>
-            </Field>
             <Field label="Sitedeki satış durumu">
               <select
                 className={field}

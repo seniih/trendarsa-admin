@@ -111,9 +111,19 @@ export function ProjectForm({ initial }: { initial?: VillaProjectInput }) {
               onChange={(targets) => set("publishTargets", targets)}
             />
           </div>
+          <Field label="Durum" hint="Kartın üstündeki rozette gösterilir.">
+            <select className={field} value={form.status} onChange={(e) => set("status", e.target.value as VillaProjectInput["status"])}>
+              <option value="available">Satışta</option>
+              <option value="reserved">Rezerve</option>
+              <option value="sold">Satıldı</option>
+            </select>
+          </Field>
         </FormSection>
 
         <FormSection step={2} title="Temel Bilgiler" description="Sayfanın adresini ve kartta görünen durumu belirler.">
+          <Field label="Başlık (TR)">
+            <input className={field} value={form.titleTr} onChange={(e) => set("titleTr", e.target.value)} />
+          </Field>
           <Field label="Slug (URL)" hint="Sitede trendev.com/projeler/<slug> adresini oluşturur, benzersiz olmalı.">
             <div className="mt-1 flex gap-2">
               <input className={field + " mt-0"} value={form.slug} onChange={(e) => set("slug", e.target.value)} placeholder="dagyoncali" />
@@ -127,13 +137,6 @@ export function ProjectForm({ initial }: { initial?: VillaProjectInput }) {
               </button>
             </div>
           </Field>
-          <Field label="Durum" hint="Kartın üstündeki rozette gösterilir.">
-            <select className={field} value={form.status} onChange={(e) => set("status", e.target.value as VillaProjectInput["status"])}>
-              <option value="available">Satışta</option>
-              <option value="reserved">Rezerve</option>
-              <option value="sold">Satıldı</option>
-            </select>
-          </Field>
           <label className="flex items-center gap-2 text-sm font-medium text-neutral-700 sm:col-span-2">
             <input type="checkbox" checked={form.featured} onChange={(e) => set("featured", e.target.checked)} />
             Öne çıkan — ana sayfada &quot;öne çıkan projeler&quot; bölümünde de gösterilir
@@ -142,12 +145,9 @@ export function ProjectForm({ initial }: { initial?: VillaProjectInput }) {
 
         <FormSection
           step={3}
-          title="Başlık ve Özet (TR / EN)"
-          description="Başlık kartta ve detay sayfasında, özet kartta 2 satır ve detay sayfasının üst kısmında gösterilir."
+          title="Başlık (EN) ve Özet (TR / EN)"
+          description="Özet kartta 2 satır ve detay sayfasının üst kısmında gösterilir."
         >
-          <Field label="Başlık (TR)">
-            <input className={field} value={form.titleTr} onChange={(e) => set("titleTr", e.target.value)} />
-          </Field>
           <Field label="Başlık (EN)" optional hint="Boşsa İngilizce sayfada başlık boş görünür.">
             <input className={field} value={form.titleEn} onChange={(e) => set("titleEn", e.target.value)} />
           </Field>
@@ -217,7 +217,12 @@ export function ProjectForm({ initial }: { initial?: VillaProjectInput }) {
             <input className={field} value={form.adaParsel} onChange={(e) => set("adaParsel", e.target.value)} />
           </Field>
           <Field label="Parsel sayısı" hint="Kartta X parsel olarak gösterilir.">
-            <input type="number" className={field} value={form.parcelCount} onChange={(e) => set("parcelCount", Number(e.target.value))} />
+            <input
+              type="number"
+              className={field}
+              value={form.parcelCount || ""}
+              onChange={(e) => set("parcelCount", e.target.value ? Number(e.target.value) : 0)}
+            />
           </Field>
           <Field label="Parsel tipi" optional hint="Şu an sitede hiçbir yerde gösterilmiyor, ileride kullanılmak üzere saklanır.">
             <select className={field} value={form.parcelKind} onChange={(e) => set("parcelKind", e.target.value as VillaProjectInput["parcelKind"])}>
@@ -226,10 +231,20 @@ export function ProjectForm({ initial }: { initial?: VillaProjectInput }) {
             </select>
           </Field>
           <Field label="Parsel alanı min (m²)" hint="Kartta ve detayda alan aralığı olarak gösterilir.">
-            <input type="number" className={field} value={form.parcelAreaMin} onChange={(e) => set("parcelAreaMin", Number(e.target.value))} />
+            <input
+              type="number"
+              className={field}
+              value={form.parcelAreaMin || ""}
+              onChange={(e) => set("parcelAreaMin", e.target.value ? Number(e.target.value) : 0)}
+            />
           </Field>
           <Field label="Parsel alanı max (m²)">
-            <input type="number" className={field} value={form.parcelAreaMax} onChange={(e) => set("parcelAreaMax", Number(e.target.value))} />
+            <input
+              type="number"
+              className={field}
+              value={form.parcelAreaMax || ""}
+              onChange={(e) => set("parcelAreaMax", e.target.value ? Number(e.target.value) : 0)}
+            />
           </Field>
         </FormSection>
 
@@ -240,27 +255,52 @@ export function ProjectForm({ initial }: { initial?: VillaProjectInput }) {
           columns={3}
         >
           <Field label="Fiyat min (TL)" hint="Kartta fiyat rakamının yanında + işaretiyle gösterilir.">
-            <input type="number" className={field} value={form.priceRangeMin} onChange={(e) => set("priceRangeMin", Number(e.target.value))} />
+            <input
+              type="number"
+              className={field}
+              value={form.priceRangeMin || ""}
+              onChange={(e) => set("priceRangeMin", e.target.value ? Number(e.target.value) : 0)}
+            />
           </Field>
           <Field label="Fiyat max (TL)" hint="Sadece detay sayfasındaki fiyat aralığında kullanılır.">
-            <input type="number" className={field} value={form.priceRangeMax} onChange={(e) => set("priceRangeMax", Number(e.target.value))} />
+            <input
+              type="number"
+              className={field}
+              value={form.priceRangeMax || ""}
+              onChange={(e) => set("priceRangeMax", e.target.value ? Number(e.target.value) : 0)}
+            />
           </Field>
           <Field label="Toplam villa alanı (m²)" hint="Kartın üst köşesindeki rozette gösterilir.">
-            <input type="number" className={field} value={form.totalAreaM2} onChange={(e) => set("totalAreaM2", Number(e.target.value))} />
+            <input
+              type="number"
+              className={field}
+              value={form.totalAreaM2 || ""}
+              onChange={(e) => set("totalAreaM2", e.target.value ? Number(e.target.value) : 0)}
+            />
           </Field>
           <Field label="Proje alanı (m²)" optional hint="Şu an sitede hiçbir yerde gösterilmiyor, ileride kullanılmak üzere saklanır.">
-            <input type="number" className={field} value={form.projectAreaM2} onChange={(e) => set("projectAreaM2", Number(e.target.value))} />
+            <input
+              type="number"
+              className={field}
+              value={form.projectAreaM2 || ""}
+              onChange={(e) => set("projectAreaM2", e.target.value ? Number(e.target.value) : 0)}
+            />
           </Field>
           <Field label="Sakarya'ya (dk)" optional hint="Detay sayfasındaki mesafe bilgisinde gösterilir.">
-            <input type="number" className={field} value={form.travelToSakaryaMin} onChange={(e) => set("travelToSakaryaMin", Number(e.target.value))} />
+            <input
+              type="number"
+              className={field}
+              value={form.travelToSakaryaMin || ""}
+              onChange={(e) => set("travelToSakaryaMin", e.target.value ? Number(e.target.value) : 0)}
+            />
           </Field>
           <Field label="İstanbul'a (saat)" optional>
             <input
               type="number"
               step="0.5"
               className={field}
-              value={form.travelToIstanbulHour}
-              onChange={(e) => set("travelToIstanbulHour", Number(e.target.value))}
+              value={form.travelToIstanbulHour || ""}
+              onChange={(e) => set("travelToIstanbulHour", e.target.value ? Number(e.target.value) : 0)}
             />
           </Field>
         </FormSection>
