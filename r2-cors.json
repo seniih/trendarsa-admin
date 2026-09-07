@@ -1,12 +1,16 @@
-[
-  {
-    "AllowedOrigins": [
-      "http://localhost:3010",
-      "https://ADMIN_PANEL_DOMAIN"
-    ],
-    "AllowedMethods": ["PUT", "GET", "HEAD"],
-    "AllowedHeaders": ["content-type"],
-    "ExposeHeaders": ["etag"],
-    "MaxAgeSeconds": 3600
-  }
-]
+{
+  "rules": [
+    {
+      "allowed": {
+        "origins": [
+          "http://localhost:3010",
+          "https://trendarsa-admin.trendarsa-software.workers.dev"
+        ],
+        "methods": ["PUT", "GET", "HEAD"],
+        "headers": ["content-type"]
+      },
+      "exposeHeaders": ["etag"],
+      "maxAgeSeconds": 3600
+    }
+  ]
+}
