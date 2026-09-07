@@ -24,12 +24,17 @@ Function sadece presigned URL üretir). Flutter uygulamasında CORS diye bir şe
 olmadığı için bu adım orada gerekmiyordu; tarayıcıda ise bucket'ta CORS kuralı
 yoksa preflight isteği engellenir ve panel "R2'ye bağlanılamadı" hatası verir.
 
-`r2-cors.json` içindeki `ADMIN_PANEL_DOMAIN` yerine panelin gerçek adresini
-yazın, sonra kuralı bucket'a uygulayın:
+`r2-cors.json`'daki adresler zaten panelin gerçek adresiyle (`trendarsa-admin`
+bucket'ı için) güncel; yeni bir origin eklenecekse dosyayı düzenleyip kuralı
+bucket'a uygulayın:
 
 ```bash
-npx wrangler r2 bucket cors put <BUCKET_ADI> --file r2-cors.json
+npx wrangler r2 bucket cors set trendarsa-app --file r2-cors.json
 ```
+
+(Not: `wrangler` eski sürümlerinde bu komut `cors put` idi ve dosya formatı
+S3-tarzı düz bir array'di; güncel `wrangler` `cors set` + Cloudflare'ın kendi
+`{"rules": [...]}` şemasını bekliyor — `r2-cors.json` bu yeni formatta.)
 
 Aynı şey Cloudflare Dashboard → R2 → bucket → **Settings → CORS Policy**
 üzerinden de yapılabilir. Yeni bir origin'den (preview deploy, farklı domain)
@@ -73,6 +78,20 @@ yüzden ilan formunda o seçenek yer almaz.
 Görsel yükleme, trendarsa-app'in kullandığı `generate-upload-url` Edge
 Function'ı üzerinden Cloudflare R2'ye gider — R2 kimlik bilgileri bu panele hiç
 sızmaz. Bucket'ta CORS kuralı gerekir (yukarı bkz.).
+
+## Deploy
+
+Next.js, `@opennextjs/cloudflare` ile Cloudflare Workers'a (`trendarsa-admin`,
+Pages değil) deploy edilir. `main` branch'ine her push'ta
+`.github/workflows/deploy.yml` otomatik deploy eder — GitHub repo secret'ları:
+`CLOUDFLARE_API_TOKEN`, `NEXT_PUBLIC_SUPABASE_URL`,
+`NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_R2_PUBLIC_BASE_URL`.
+
+Elle deploy için:
+
+```bash
+npm run cf:deploy
+```
 
 ## Kapsam dışı (bilinçli olarak yapılmadı)
 
