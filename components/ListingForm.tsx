@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Trash2 } from "lucide-react";
+import { Trash2, Check } from "lucide-react";
 import { useSession } from "@/lib/auth";
 import { saveListing, deleteListing, type ListingInput } from "@/lib/listings";
 import { slugify } from "@/lib/utils";
@@ -58,6 +58,7 @@ export function ListingForm({ initial }: { initial?: ListingInput }) {
   const [form, setForm] = useState<ListingInput>(initial ?? emptyListing());
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<string | null>(null);
 
   function set<K extends keyof ListingInput>(key: K, value: ListingInput[K]) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -67,10 +68,23 @@ export function ListingForm({ initial }: { initial?: ListingInput }) {
     if (!session) return;
     setSaving(true);
     setError(null);
+    setFeedback(null);
     try {
+      const isEdit = Boolean(form.id);
       const id = await saveListing(form, session.user.id);
-      router.push(`/listings/edit?id=${id}`);
-      router.refresh();
+      setForm((f) => ({ ...f, id }));
+      setFeedback(isEdit ? "Başarıyla güncellendi." : "Başarıyla kaydedildi.");
+      setTimeout(() => setFeedback(null), 4000);
+      if (isEdit) {
+        router.refresh();
+      } else {
+        // Navigating to the edit route remounts this component, so delay
+        // just long enough for the feedback message to be seen.
+        setTimeout(() => {
+          router.push(`/listings/edit?id=${id}`);
+          router.refresh();
+        }, 1200);
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Kaydedilemedi");
     } finally {
@@ -309,13 +323,23 @@ export function ListingForm({ initial }: { initial?: ListingInput }) {
 
         {error && <p className="text-sm text-red-600">{error}</p>}
 
-        <button
-          onClick={onSubmit}
-          disabled={saving}
-          className="rounded-md bg-neutral-900 px-5 py-2.5 text-sm font-medium text-white disabled:opacity-50"
-        >
-          {saving ? "Kaydediliyor…" : "Kaydet"}
-        </button>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={onSubmit}
+            disabled={saving}
+            className="rounded-md bg-neutral-900 px-5 py-2.5 text-sm font-medium text-white disabled:opacity-50"
+          >
+            {saving
+              ? (form.id ? "Güncelleniyor…" : "Kaydediliyor…")
+              : (form.id ? "Güncelle" : "Kaydet")}
+          </button>
+          {feedback && (
+            <span className="flex items-center gap-1.5 text-sm font-medium text-emerald-600">
+              <Check className="h-4 w-4" />
+              {feedback}
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="order-first mb-6 lg:sticky lg:top-6 lg:order-last lg:mb-0">

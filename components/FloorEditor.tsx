@@ -25,7 +25,7 @@ function emptyFloor(): Floor {
 }
 
 function emptyRoom(): FloorRoom {
-  return { roomKey: "bedroom", count: 1 };
+  return { roomKey: "bedroom", areaM2: null };
 }
 
 export function FloorEditor({ floors, onChange }: { floors: Floor[]; onChange: (floors: Floor[]) => void }) {
@@ -110,10 +110,12 @@ export function FloorEditor({ floors, onChange }: { floors: Floor[]; onChange: (
                 </select>
                 <input
                   type="number"
-                  min={1}
-                  value={room.count}
-                  onChange={(e) => updateRoom(floorIndex, roomIndex, { count: Number(e.target.value) })}
-                  className="w-16 rounded-md border border-neutral-300 px-2 py-1 text-sm"
+                  value={room.areaM2 ?? ""}
+                  onChange={(e) =>
+                    updateRoom(floorIndex, roomIndex, { areaM2: e.target.value ? Number(e.target.value) : null })
+                  }
+                  placeholder="Alan m²"
+                  className="w-24 rounded-md border border-neutral-300 px-2 py-1 text-sm"
                 />
                 <button
                   type="button"

@@ -13,7 +13,7 @@ export type RoomKey =
 
 export interface FloorRoom {
   roomKey: RoomKey;
-  count: number;
+  areaM2: number | null;
 }
 
 export interface Floor {
@@ -116,7 +116,7 @@ export async function fetchVillaProject(id: string): Promise<VillaProjectInput> 
        total_area_m2, travel_to_sakarya_min, travel_to_istanbul_hour, cover_image_key,
        publish_targets,
        project_floors ( id, key, area_m2, outdoor_kind, outdoor_area_m2, position,
-         project_floor_rooms ( room_key, count, position ) ),
+         project_floor_rooms ( room_key, area_m2, position ) ),
        project_images ( id, storage_key, position )`,
     )
     .eq("id", id)
@@ -132,7 +132,7 @@ export async function fetchVillaProject(id: string): Promise<VillaProjectInput> 
       outdoorAreaM2: f.outdoor_area_m2,
       rooms: [...f.project_floor_rooms]
         .sort((a, b) => a.position - b.position)
-        .map((r) => ({ roomKey: r.room_key, count: r.count })),
+        .map((r) => ({ roomKey: r.room_key, areaM2: r.area_m2 })),
     }));
 
   const gallery: GalleryImage[] = [...data.project_images]
@@ -243,7 +243,7 @@ export async function saveVillaProject(input: VillaProjectInput, adminId: string
     const roomRows = floor.rooms.map((r, i) => ({
       floor_id: floorRow.id,
       room_key: r.roomKey,
-      count: r.count,
+      area_m2: r.areaM2,
       position: i,
     }));
     if (roomRows.length > 0) {
