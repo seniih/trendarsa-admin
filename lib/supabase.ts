@@ -6,7 +6,7 @@ import { createClient } from "@supabase/supabase-js";
  * trendarsa-app ile ortak Supabase projesi. Bu panel tamamen client-side
  * çalışır (SSR/middleware yok) — oturum tarayıcının localStorage'ında tutulur,
  * tıpkı trendarsa-app'in Flutter admin ekranlarındaki gibi "oturum var =
- * admin" mantığı geçerli (bkz. trendarsa-app CLAUDE.md, `isAdminProvider`).
+ * admin" mantığı geçerli (bkz. trendarsa-app README → Mimari, `isAdminProvider`).
  */
 export const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
